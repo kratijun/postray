@@ -33,6 +33,7 @@ export default function MapPage() {
   const [rayon, setRayon] = useState<Rayon | null>(null);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [gpsPosition, setGpsPosition] = useState<[number, number] | null>(null);
+  const [followGPS, setFollowGPS] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -147,6 +148,8 @@ export default function MapPage() {
             onAddressClick={handleAddressClick}
             gpsPosition={gpsPosition}
             bounds={typeof rayon.bounds === 'object' ? rayon.bounds : null}
+            followGPS={followGPS}
+            onFollowToggle={setFollowGPS}
           />
         )}
       </div>
