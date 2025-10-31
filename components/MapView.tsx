@@ -1,36 +1,9 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-
-// Marker-Icons fixieren (Leaflet Standard-Icons)
-if (typeof window !== 'undefined') {
-  delete (L.Icon.Default.prototype as any)._getIconUrl;
-  L.Icon.Default.mergeOptions({
-    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-  });
-}
-
-// Status-Farben für Marker
-const statusColors = {
-  OPEN: '#ef4444',
-  DELIVERED: '#22c55e',
-  UNCLEAR: '#eab308',
-};
-
-// Custom Marker-Icon erstellen
-function createStatusIcon(status: 'OPEN' | 'DELIVERED' | 'UNCLEAR') {
-  return L.divIcon({
-    className: 'custom-marker',
-    html: `<div style="background-color: ${statusColors[status]}; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
-    iconSize: [24, 24],
-    iconAnchor: [12, 12],
-  });
-}
 
 // GPS-Position Marker
 const gpsIcon = L.divIcon({
@@ -39,15 +12,6 @@ const gpsIcon = L.divIcon({
   iconSize: [32, 32],
   iconAnchor: [16, 16],
 });
-
-// Map-Zentrierung auf GPS-Position
-function MapCenter({ center }: { center: [number, number] }) {
-  const map = useMap();
-  useEffect(() => {
-    map.setView(center, map.getZoom());
-  }, [center, map]);
-  return null;
-}
 
 interface Address {
   id: string;
@@ -125,28 +89,7 @@ export default function MapView({
             <Popup>Ihre aktuelle Position</Popup>
           </Marker>
         )}
-        {addresses.map((address) => (
-          <Marker
-            key={address.id}
-            position={[address.lat, address.lng]}
-            icon={createStatusIcon(address.status)}
-            eventHandlers={{
-              click: () => onAddressClick(address),
-            }}
-          >
-            <Popup>
-              <div className="text-sm">
-                <p className="font-semibold">
-                  {address.street} {address.houseNumber}
-                </p>
-                <p className="text-gray-600 capitalize">{address.status.toLowerCase()}</p>
-                {address.notes && (
-                  <p className="text-gray-500 mt-1">{address.notes}</p>
-                )}
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+        {/* Address markers removed for performance */}
       </MapContainer>
     </div>
   );
