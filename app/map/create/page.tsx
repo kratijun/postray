@@ -299,7 +299,7 @@ export default function CreateRayonPage() {
         </div>
       </header>
 
-      <div className="flex-1 relative">
+      <div className="flex-1 relative bg-gray-100 dark:bg-gray-800">
         {typeof window !== 'undefined' && mapCenter && (
           <MapContainer
             center={mapCenter}

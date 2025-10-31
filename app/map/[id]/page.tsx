@@ -141,7 +141,7 @@ export default function MapPage() {
       </div>
 
       {/* Karte */}
-      <div className="flex-1 relative">
+      <div className="flex-1 relative bg-gray-100 dark:bg-gray-800">
         {typeof window !== 'undefined' && rayon && (
           <MapView
             addresses={addresses}
