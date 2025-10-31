@@ -63,6 +63,76 @@ function FollowGPS({ gpsPosition, follow }: { gpsPosition?: [number, number] | n
   return null;
 }
 
+// Komponente für Zoom-Tracking und Viewport-Marker
+function SmartMarkers({ 
+  addresses, 
+  onAddressClick 
+}: { 
+  addresses: Address[]; 
+  onAddressClick: (address: Address) => void;
+}) {
+  const map = useMap();
+  const [zoom, setZoom] = useState(map.getZoom());
+  const [viewportBounds, setViewportBounds] = useState<L.LatLngBounds | null>(null);
+
+  useEffect(() => {
+    const updateZoom = () => setZoom(map.getZoom());
+    const updateBounds = () => setViewportBounds(map.getBounds());
+    
+    map.on('zoomend', updateZoom);
+    map.on('moveend', updateBounds);
+    updateBounds(); // Initial bounds
+    
+    return () => {
+      map.off('zoomend', updateZoom);
+      map.off('moveend', updateBounds);
+    };
+  }, [map]);
+
+  // Nur Marker bei hohem Zoom zeigen (ab 17)
+  if (zoom < 17 || !viewportBounds) {
+    return null;
+  }
+
+  // Filtere Adressen die im aktuellen Viewport sind
+  const visibleAddresses = addresses.filter(addr => {
+    return viewportBounds.contains([addr.lat, addr.lng]);
+  });
+
+  return (
+    <>
+      {visibleAddresses.map((address) => (
+        <Marker
+          key={address.id}
+          position={[address.lat, address.lng]}
+          icon={createAddressIcon(address.houseNumber)}
+          eventHandlers={{
+            click: () => onAddressClick(address),
+          }}
+        >
+          <Popup>
+            <div className="text-sm">
+              <p className="font-semibold">
+                {address.street} {address.houseNumber}
+              </p>
+            </div>
+          </Popup>
+        </Marker>
+      ))}
+    </>
+  );
+}
+
+// Icon für Hausnummern
+function createAddressIcon(houseNumber: string) {
+  return L.divIcon({
+    className: 'house-number-marker',
+    html: `<div style="background-color: #ef4444; color: white; width: 28px; height: 28px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold;">${houseNumber}</div>`,
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
+  });
+}
+
 export default function MapView({
   addresses,
   onAddressClick,
@@ -109,7 +179,7 @@ export default function MapView({
             <Popup>Ihre aktuelle Position</Popup>
           </Marker>
         )}
-        {/* Address markers removed for performance */}
+        <SmartMarkers addresses={addresses} onAddressClick={onAddressClick} />
       </MapContainer>
       
       {/* Follow-Button */}
