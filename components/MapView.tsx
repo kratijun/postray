@@ -95,7 +95,8 @@ export default function MapView({
         zoom={bounds ? 13 : 16}
         style={{ height: '100%', width: '100%', zIndex: 0 }}
         zoomControl={true}
-        maxZoom={19}
+        maxZoom={18}
+        minZoom={10}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
