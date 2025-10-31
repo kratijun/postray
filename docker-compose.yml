@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  postray:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXTAUTH_URL=http://localhost:3000
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - DATABASE_URL=file:./prisma/postray.db
+    volumes:
+      - ./prisma:/app/prisma
+    restart: unless-stopped
+
