@@ -108,21 +108,34 @@ function SmartMarkers({
     streetsMap.get(addr.street)!.push(addr);
   });
 
-  // Berechne Durchschnittsposition für jede Straße
+  // Berechne Durchschnittsposition und Richtung für jede Straße
   const streetMarkers = Array.from(streetsMap.entries()).map(([street, addrs]) => {
     const avgLat = addrs.reduce((sum, addr) => sum + addr.lat, 0) / addrs.length;
     const avgLng = addrs.reduce((sum, addr) => sum + addr.lng, 0) / addrs.length;
-    return { street, position: [avgLat, avgLng] as [number, number], count: addrs.length };
+    
+    // Berechne Richtung der Straße basierend auf den Adressen
+    let bearing = 0;
+    if (addrs.length >= 2) {
+      // Sortiere nach Distanz von einem Referenzpunkt
+      const sorted = addrs.sort((a, b) => (a.lat + a.lng) - (b.lat + b.lng));
+      const first = sorted[0];
+      const last = sorted[sorted.length - 1];
+      
+      // Berechne Winkel zwischen erster und letzter Adresse
+      bearing = Math.atan2(last.lng - first.lng, last.lat - first.lat) * 180 / Math.PI;
+    }
+    
+    return { street, position: [avgLat, avgLng] as [number, number], count: addrs.length, bearing };
   });
 
   return (
     <>
-      {/* Straßenmarker */}
-      {zoom >= 17 && zoom < 18 && streetMarkers.map(({ street, position, count }) => (
+      {/* Straßenmarker - ALWAYS angezeigt ab Zoom 17 */}
+      {zoom >= 17 && streetMarkers.map(({ street, position, count, bearing }) => (
         <Marker
           key={`street-${street}`}
           position={position}
-          icon={createStreetIcon(street, count)}
+          icon={createStreetIcon(street, count, bearing)}
         >
           <Popup>
             <div className="text-sm">
@@ -156,8 +169,8 @@ function SmartMarkers({
   );
 }
 
-// Icon für Straßennamen
-function createStreetIcon(street: string, count: number) {
+// Icon für Straßennamen mit Rotation
+function createStreetIcon(street: string, count: number, bearing: number) {
   // Kürze Straßennamen für bessere Lesbarkeit
   const shortStreet = street.length > 18 ? street.substring(0, 16) + '...' : street;
   
@@ -167,28 +180,31 @@ function createStreetIcon(street: string, count: number) {
       <div style="
         background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
         color: white;
-        min-width: 100px;
-        padding: 6px 12px;
-        border-radius: 8px;
+        min-width: 120px;
+        padding: 8px 14px;
+        border-radius: 12px;
         border: 3px solid white;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.5);
+        box-shadow: 0 3px 12px rgba(0,0,0,0.6);
+        transform: rotate(${bearing}deg);
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 2px;
+        gap: 3px;
         font-weight: bold;
         text-align: center;
+        white-space: nowrap;
       ">
-        <div style="font-size: 11px; line-height: 1.3;">
+        <div style="font-size: 12px; line-height: 1.3;">
           🛣️ ${shortStreet}
         </div>
-        <div style="font-size: 9px; opacity: 0.9; font-weight: normal;">
+        <div style="font-size: 9px; opacity: 0.95; font-weight: normal;">
           ${count} Adressen
         </div>
       </div>
     `,
-    iconSize: [100, 45],
-    iconAnchor: [50, 45],
+    iconSize: [120, 50],
+    iconAnchor: [60, 25],
+    popupAnchor: [0, -25],
   });
 }
 
