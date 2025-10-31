@@ -5,12 +5,12 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-// GPS-Position Marker
+// GPS-Position Marker - Gelbes Postauto
 const gpsIcon = L.divIcon({
   className: 'gps-marker',
-  html: `<div style="background-color: #3b82f6; width: 32px; height: 32px; border-radius: 50%; border: 4px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.4); animation: pulse 2s infinite;"></div>`,
-  iconSize: [32, 32],
-  iconAnchor: [16, 16],
+  html: `<div style="background-color: #FFD700; width: 40px; height: 40px; border-radius: 8px; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; font-size: 24px; animation: pulse 2s infinite;">🚐</div>`,
+  iconSize: [40, 40],
+  iconAnchor: [20, 20],
 });
 
 interface Address {
