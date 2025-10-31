@@ -101,35 +101,62 @@ function SmartMarkers({
 
   return (
     <>
-      {visibleAddresses.map((address) => (
-        <Marker
-          key={address.id}
-          position={[address.lat, address.lng]}
-          icon={createAddressIcon(address.houseNumber)}
-          eventHandlers={{
-            click: () => onAddressClick(address),
-          }}
-        >
-          <Popup>
-            <div className="text-sm">
-              <p className="font-semibold">
-                {address.street} {address.houseNumber}
-              </p>
-            </div>
-          </Popup>
-        </Marker>
-      ))}
+        {visibleAddresses.map((address) => (
+          <Marker
+            key={address.id}
+            position={[address.lat, address.lng]}
+            icon={createAddressIcon(address.street, address.houseNumber)}
+            eventHandlers={{
+              click: () => onAddressClick(address),
+            }}
+          >
+            <Popup>
+              <div className="text-sm">
+                <p className="font-semibold">
+                  {address.street} {address.houseNumber}
+                </p>
+              </div>
+            </Popup>
+          </Marker>
+        ))}
     </>
   );
 }
 
-// Icon für Hausnummern
-function createAddressIcon(houseNumber: string) {
+// Icon für Hausnummern mit Straßenname
+function createAddressIcon(street: string, houseNumber: string) {
+  // Kürze Straßennamen für bessere Lesbarkeit
+  const shortStreet = street.length > 12 ? street.substring(0, 10) + '...' : street;
+  
   return L.divIcon({
     className: 'house-number-marker',
-    html: `<div style="background-color: #ef4444; color: white; width: 28px; height: 28px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold;">${houseNumber}</div>`,
-    iconSize: [28, 28],
-    iconAnchor: [14, 14],
+    html: `
+      <div style="
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        min-width: 60px;
+        max-width: 120px;
+        padding: 8px 10px;
+        border-radius: 8px;
+        border: 3px solid white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        font-weight: bold;
+        text-align: center;
+      ">
+        <div style="font-size: 10px; line-height: 1.2; opacity: 0.95;">
+          ${shortStreet}
+        </div>
+        <div style="font-size: 16px; line-height: 1;">
+          ${houseNumber}
+        </div>
+      </div>
+    `,
+    iconSize: [80, 50],
+    iconAnchor: [40, 50],
   });
 }
 
