@@ -208,13 +208,13 @@ function createStreetIcon(street: string, count: number, bearing: number) {
   });
 }
 
-// Icon für Hausnummern (ohne Straßennamen)
+// Icon für Hausnummern (ohne Straßennamen) - kompakt und übersichtlich
 function createHouseNumberIcon(houseNumber: string) {
   return L.divIcon({
     className: 'house-number-marker',
-    html: `<div style="background-color: #ef4444; color: white; width: 32px; height: 32px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold;">${houseNumber}</div>`,
-    iconSize: [32, 32],
-    iconAnchor: [16, 16],
+    html: `<div style="background-color: #ef4444; color: white; width: 24px; height: 20px; border-radius: 4px; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold;">${houseNumber}</div>`,
+    iconSize: [24, 20],
+    iconAnchor: [12, 10],
   });
 }
 
