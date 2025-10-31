@@ -99,47 +99,79 @@ function SmartMarkers({
     return viewportBounds.contains([addr.lat, addr.lng]);
   });
 
+  // Gruppiere Adressen nach Straße
+  const streetsMap = new Map<string, Address[]>();
+  visibleAddresses.forEach(addr => {
+    if (!streetsMap.has(addr.street)) {
+      streetsMap.set(addr.street, []);
+    }
+    streetsMap.get(addr.street)!.push(addr);
+  });
+
+  // Berechne Durchschnittsposition für jede Straße
+  const streetMarkers = Array.from(streetsMap.entries()).map(([street, addrs]) => {
+    const avgLat = addrs.reduce((sum, addr) => sum + addr.lat, 0) / addrs.length;
+    const avgLng = addrs.reduce((sum, addr) => sum + addr.lng, 0) / addrs.length;
+    return { street, position: [avgLat, avgLng] as [number, number], count: addrs.length };
+  });
+
   return (
     <>
-        {visibleAddresses.map((address) => (
-          <Marker
-            key={address.id}
-            position={[address.lat, address.lng]}
-            icon={createAddressIcon(address.street, address.houseNumber)}
-            eventHandlers={{
-              click: () => onAddressClick(address),
-            }}
-          >
-            <Popup>
-              <div className="text-sm">
-                <p className="font-semibold">
-                  {address.street} {address.houseNumber}
-                </p>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+      {/* Straßenmarker */}
+      {zoom >= 17 && zoom < 18 && streetMarkers.map(({ street, position, count }) => (
+        <Marker
+          key={`street-${street}`}
+          position={position}
+          icon={createStreetIcon(street, count)}
+        >
+          <Popup>
+            <div className="text-sm">
+              <p className="font-semibold">{street}</p>
+              <p className="text-gray-600">{count} Adressen</p>
+            </div>
+          </Popup>
+        </Marker>
+      ))}
+      
+      {/* Hausnummer-Marker nur bei max Zoom */}
+      {zoom >= 18 && visibleAddresses.map((address) => (
+        <Marker
+          key={address.id}
+          position={[address.lat, address.lng]}
+          icon={createHouseNumberIcon(address.houseNumber)}
+          eventHandlers={{
+            click: () => onAddressClick(address),
+          }}
+        >
+          <Popup>
+            <div className="text-sm">
+              <p className="font-semibold">
+                {address.street} {address.houseNumber}
+              </p>
+            </div>
+          </Popup>
+        </Marker>
+      ))}
     </>
   );
 }
 
-// Icon für Hausnummern mit Straßenname
-function createAddressIcon(street: string, houseNumber: string) {
+// Icon für Straßennamen
+function createStreetIcon(street: string, count: number) {
   // Kürze Straßennamen für bessere Lesbarkeit
-  const shortStreet = street.length > 12 ? street.substring(0, 10) + '...' : street;
+  const shortStreet = street.length > 18 ? street.substring(0, 16) + '...' : street;
   
   return L.divIcon({
-    className: 'house-number-marker',
+    className: 'street-marker',
     html: `
       <div style="
-        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
         color: white;
-        min-width: 60px;
-        max-width: 120px;
-        padding: 8px 10px;
+        min-width: 100px;
+        padding: 6px 12px;
         border-radius: 8px;
         border: 3px solid white;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        box-shadow: 0 3px 10px rgba(0,0,0,0.5);
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -147,16 +179,26 @@ function createAddressIcon(street: string, houseNumber: string) {
         font-weight: bold;
         text-align: center;
       ">
-        <div style="font-size: 10px; line-height: 1.2; opacity: 0.95;">
-          ${shortStreet}
+        <div style="font-size: 11px; line-height: 1.3;">
+          🛣️ ${shortStreet}
         </div>
-        <div style="font-size: 16px; line-height: 1;">
-          ${houseNumber}
+        <div style="font-size: 9px; opacity: 0.9; font-weight: normal;">
+          ${count} Adressen
         </div>
       </div>
     `,
-    iconSize: [80, 50],
-    iconAnchor: [40, 50],
+    iconSize: [100, 45],
+    iconAnchor: [50, 45],
+  });
+}
+
+// Icon für Hausnummern (ohne Straßennamen)
+function createHouseNumberIcon(houseNumber: string) {
+  return L.divIcon({
+    className: 'house-number-marker',
+    html: `<div style="background-color: #ef4444; color: white; width: 32px; height: 32px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold;">${houseNumber}</div>`,
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
   });
 }
 
